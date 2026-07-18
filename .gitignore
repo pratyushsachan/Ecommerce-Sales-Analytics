@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Ignore large raw and processed data files - too big for GitHub, available via Kaggle link in README
+data/raw/*.csv
+data/processed/olist_master_v1.csv
+ecommerce.db
