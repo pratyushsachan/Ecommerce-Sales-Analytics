@@ -1,0 +1,180 @@
+-- Query 1: Order status distribution
+-- Purpose: Understand what % of orders are delivered vs cancelled/other statuses
+SELECT 
+    order_status, 
+    COUNT(DISTINCT order_id) as total_orders
+FROM orders_master
+GROUP BY order_status;
+
+
+query = """
+-- Find total revenue and order count per product category, ranked highest to lowest
+-- Purpose: Identify which categories drive the most revenue
+SELECT 
+    product_category_name_english as category,
+    COUNT(DISTINCT order_id) as total_orders,
+    ROUND(SUM(item_revenue), 2) as total_revenue
+FROM orders_master
+WHERE product_category_name_english IS NOT NULL
+GROUP BY product_category_name_english
+ORDER BY total_revenue DESC
+LIMIT 10;
+"""
+result = pd.read_sql_query(query, conn)
+print(result)
+
+
+query = """
+-- Track total revenue by month to see growth/decline over time
+-- Purpose: Identify seasonality or growth trends
+SELECT 
+    order_year_month,
+    ROUND(SUM(item_revenue), 2) as monthly_revenue,
+    COUNT(DISTINCT order_id) as total_orders
+FROM orders_master
+GROUP BY order_year_month
+ORDER BY order_year_month;
+"""
+result = pd.read_sql_query(query, conn)
+print(result)
+
+
+query = """
+-- Find the top 10 sellers generating the most revenue
+-- Purpose: Identify high-performing sellers worth partnering closer with
+SELECT 
+    seller_id,
+    seller_state,
+    COUNT(DISTINCT order_id) as total_orders,
+    ROUND(SUM(item_revenue), 2) as total_revenue
+FROM orders_master
+GROUP BY seller_id, seller_state
+ORDER BY total_revenue DESC
+LIMIT 10;
+"""
+result = pd.read_sql_query(query, conn)
+print(result)
+
+
+query = """
+-- Total revenue and order count grouped by customer's state
+-- Purpose: Identify which regions to prioritize for marketing/logistics
+SELECT 
+    customer_state,
+    COUNT(DISTINCT order_id) as total_orders,
+    ROUND(SUM(item_revenue), 2) as total_revenue
+FROM orders_master
+GROUP BY customer_state
+ORDER BY total_revenue DESC;
+"""
+result = pd.read_sql_query(query, conn)
+print(result)
+
+
+query = """
+-- Revenue and customer count by RFM segment
+-- Purpose: Quantify the size and value of each customer segment
+SELECT 
+    segment,
+    COUNT(*) as customer_count,
+    ROUND(SUM(monetary), 2) as total_revenue,
+    ROUND(AVG(monetary), 2) as avg_revenue_per_customer
+FROM customer_rfm
+GROUP BY segment
+ORDER BY total_revenue DESC;
+"""
+result = pd.read_sql_query(query, conn)
+print(result)
+
+
+--result
+```
+                category  total_orders  total_revenue
+0          health_beauty          8647     1461349.75
+1          watches_gifts          5495     1316696.84
+2         bed_bath_table          9272     1309729.85
+3         sports_leisure          7530     1166307.34
+4  computers_accessories          6530     1077483.63
+5        furniture_decor          6307      931754.14
+6             housewares          5743      801521.45
+7             cool_stuff          3559      722033.51
+8                   auto          3810      698077.73
+9           garden_tools          3448      595367.38
+
+   order_year_month  monthly_revenue  total_orders
+0           2016-09           143.46             1
+1           2016-10         48314.12           265
+2           2016-12            19.62             1
+3           2017-01        138323.99           750
+4           2017-02        286678.44          1653
+5           2017-03        442061.00          2546
+6           2017-04        414527.46          2303
+7           2017-05        614885.90          3546
+8           2017-06        518076.28          3135
+9           2017-07        610664.84          3872
+10          2017-08        680858.92          4193
+11          2017-09        746898.44          4150
+12          2017-10        789406.96          4478
+13          2017-11       1205033.35          7289
+14          2017-12        877503.67          5513
+15          2018-01       1128224.39          7069
+16          2018-02       1016511.44          6555
+17          2018-03       1172957.65          7003
+18          2018-04       1174143.49          6798
+19          2018-05       1171614.43          6749
+20          2018-06       1064996.68          6099
+21          2018-07       1066593.79          6159
+22          2018-08       1020340.91          6351
+
+                          seller_id seller_state  total_orders  total_revenue
+0  4869f7a5dfa277a7dca6462dcf3b52b2           SP          1124      255991.88
+1  53243585a1d6dc2643021fd1853d8905           BA           348      253822.62
+2  7c67e1448b00f6e969d365cea6b010ab           SP           973      252657.95
+3  4a3ca9315b744ce9f8e9374361493884           SP          1772      249108.33
+4  fa1c13f2614d7b5c4749cbc52fecda94           SP           578      211203.59
+5  da8622b14eb17ae2831f4ac5b9dab84a           SP          1311      197592.40
+6  7e93a43ef30c4f03f38b393420bc753a           SP           319      178695.40
+7  1025f0e2d44d7041d6cf58b6550e0bfa           SP           910      177712.22
+8  7a67c85e85bb2ce8582c35f2203ad736           SP          1145      170517.37
+9  955fee9216a65b617aa5c0531780ce60           SP          1261      159279.51
+
+   customer_state  total_orders  total_revenue
+0              SP         40501     6076438.89
+1              RJ         12350     2167521.77
+2              MG         11354     1890600.24
+3              RS          5345      908920.14
+4              PR          4923      812671.95
+5              BA          3256      627081.41
+6              SC          3546      616385.81
+7              DF          2080      360530.87
+8              GO          1957      355374.39
+9              ES          1995      328955.10
+10             PE          1593      321062.12
+11             CE          1279      281430.06
+12             PA           946      219300.64
+13             MT           886      186000.71
+14             MA           717      151814.71
+15             PB           517      148333.53
+16             MS           701      139757.80
+17             RN           474      113567.01
+18             PI           476      111665.76
+19             AL           397       97724.79
+20             SE           335       72694.76
+21             TO           274       68355.46
+22             RO           243       58089.48
+23             AM           145       28298.78
+24             AC            80       20767.13
+25             AP            67       16396.40
+26             RR            41        9039.52
+
+
+           segment  customer_count  total_revenue  avg_revenue_per_customer
+0          At Risk           22230     3961184.67                    178.19
+1  Loyal Customers           18824     3180311.51                    168.95
+2        Champions           14961     2761828.11                    184.60
+3             Lost           14986     2559505.14                    170.79
+4    New Customers           14984     2550881.51                    170.24
+5  Needs Attention            7373     1175068.29                    159.37
+
+
+```

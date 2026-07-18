@@ -1,0 +1,5 @@
+delay_bucket,avg_review_score,order_count
+1. On-time/Early,4.205689990417445,107487
+2. Late 1-3 days,3.234965034965035,2145
+3. Late 4-7 days,2.084812623274162,2028
+4. Late 8+ days,1.7010018785222292,3194
