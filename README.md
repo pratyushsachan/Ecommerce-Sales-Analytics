@@ -10,7 +10,7 @@ Olist is a Brazilian e-commerce platform connecting small sellers to major marke
 - Does delivery delay actually hurt customer satisfaction, and by how much?
 
 ## Tools Used
-- **Python (Pandas)** — data cleaning, merging 9 relational tables, feature engineering (RFM, delivery delay), handling missing values and duplicates
+- **Python (Pandas, scikit-learn)** — data cleaning, merging 9 relational tables, feature engineering (RFM, delivery delay), and a churn prediction model
 - **SQL (SQLite)** — business-question queries (revenue by category, monthly trends, top sellers, regional breakdown, RFM segment summary)
 - **Power BI** — interactive dashboard with KPIs, trend lines, segment visuals, and a state-level slicer
 
@@ -26,6 +26,17 @@ Olist is a Brazilian e-commerce platform connecting small sellers to major marke
 
 5. **Monthly revenue grew consistently from late 2016 through 2018**, peaking in November 2017 (₹1.2M) — likely a seasonal/Black Friday effect. Data coverage ends mid-2018, reflecting the dataset's collection window rather than an actual business decline.
 
+## Churn Prediction Model
+
+Extended the analysis with a machine learning model to predict customer churn, using RFM and delivery/review behavior as features.
+
+- **Approach**: Labeled customers as churned based on recency (top 25% most inactive). Trained a Random Forest classifier using frequency, monetary value, average delivery delay, and average review score as predictors.
+- **Data leakage caught and fixed**: Initial model scored 100% accuracy — investigation revealed recency (used to define the churn label) was also included as a feature, causing leakage. Removed it and retrained.
+- **Final model**: 64% accuracy, with class balancing applied to improve recall on the minority "churned" class (0.29 → 0.37).
+- **Key finding**: Monetary value was by far the strongest churn predictor (88% feature importance) — far more than delivery delay or review score — suggesting spend level, not service experience, is the primary retention risk factor in this dataset.
+
+*Notebook: `notebooks/02_churn_prediction.ipynb`*
+
 ## Dashboard
 
 ![Dashboard Screenshot](images/dashboard_screenshot.png)
@@ -39,11 +50,11 @@ The dashboard includes:
 - Interactive state-level slicer
 
 ## Project Structure
-data/processed/     - Cleaned datasets and exports used for Power BI (raw data excluded due to size)
-notebooks/          - Python notebooks for data cleaning, merging, RFM segmentation, feature engineering
-sql/queries.sql     - Documented SQL queries for all business questions
-dashboard/          - Power BI (.pbix) dashboard file
-images/             - Dashboard screenshot
+data/processed/ - Cleaned datasets and exports used for Power BI (raw data excluded due to size)
+notebooks/ - Python notebooks for data cleaning, merging, RFM segmentation, feature engineering, churn model
+sql/queries.sql - Documented SQL queries for all business questions
+dashboard/ - Power BI (.pbix) dashboard file
+images/ - Dashboard screenshot
 
 ## Methodology
 
@@ -51,16 +62,17 @@ images/             - Dashboard screenshot
 2. **Feature Engineering**: Calculated delivery delay (actual vs. estimated delivery date), monthly order periods, and item-level revenue.
 3. **RFM Segmentation**: Scored all customers on Recency, Frequency, and Monetary value using quintile-based scoring, then classified them into six actionable segments (Champions, Loyal Customers, At Risk, Lost, New Customers, Needs Attention).
 4. **SQL Analysis**: Loaded the cleaned dataset into SQLite and wrote queries answering each business question independently of the Python analysis, to demonstrate both toolsets.
-5. **Dashboard**: Built an interactive Power BI dashboard translating each finding into a visual, paired with a written business recommendation.
+5. **Churn Modeling**: Built a Random Forest classifier on top of RFM and delivery/review features, catching and correcting a data leakage issue before arriving at a realistic, defensible model.
+6. **Dashboard**: Built an interactive Power BI dashboard translating each finding into a visual, paired with a written business recommendation.
 
 ## How to Reproduce
 
 1. Download the raw dataset from [Kaggle - Olist Brazilian E-Commerce](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 2. Place the extracted CSVs into `data/raw/`
-3. Run the notebook(s) in `notebooks/` to clean, merge, and export the data
+3. Run the notebooks in `notebooks/` in order to clean, merge, export data, and train the churn model
 4. Open `dashboard/ecommerce_dashboard.pbix` in Power BI Desktop to view the interactive dashboard
 
 ## Author
 
 **Pratyush Sachan**
-[https://www.linkedin.com/in/pratyushsachan/](#) | [GitHub](https://github.com/pratyushsachan/Ecommerce-Sales-Analytics)
+[LinkedIn](https://www.linkedin.com/in/pratyushsachan/) | [GitHub](https://github.com/pratyushsachan/Ecommerce-Sales-Analytics)
