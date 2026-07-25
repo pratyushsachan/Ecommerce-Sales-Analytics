@@ -10,7 +10,7 @@ Olist is a Brazilian e-commerce platform connecting small sellers to major marke
 - Does delivery delay actually hurt customer satisfaction, and by how much?
 
 ## Tools Used
-- **Python (Pandas, scikit-learn)** — data cleaning, merging 9 relational tables, feature engineering (RFM, delivery delay), and a churn prediction model
+- **Python (Pandas, scikit-learn, Hugging Face Transformers)** — data cleaning, merging 9 relational tables, feature engineering (RFM, delivery delay), a churn prediction model, and NLP-based review sentiment analysis
 - **SQL (SQLite)** — business-question queries (revenue by category, monthly trends, top sellers, regional breakdown, RFM segment summary)
 - **Power BI** — interactive dashboard with KPIs, trend lines, segment visuals, and a state-level slicer
 
@@ -37,6 +37,16 @@ Extended the analysis with a machine learning model to predict customer churn, u
 
 *Notebook: `notebooks/02_churn_prediction.ipynb`*
 
+## Review Sentiment & Theme Analysis
+
+Extended the project further with an NLP layer analyzing the unstructured review text (`review_comment_message`), which the earlier structured analysis didn't touch.
+
+- **Sentiment Analysis**: Used a pre-trained multilingual BERT model (`nlptown/bert-base-multilingual-uncased-sentiment`) to classify sentiment on a sample of 3,000 written Portuguese reviews, with no translation needed.
+- **Theme Classification**: Tagged reviews into complaint/praise themes (late delivery, product quality, packaging damage, customer service, wrong item, good experience) using a keyword-based rule system, chosen after zero-shot transformer classification proved too slow to run at scale locally — a practical tradeoff between depth and runtime.
+- **Key finding**: Among negative reviews with an identifiable theme, **late delivery was the most common complaint** (80 mentions), followed by product quality (66) and packaging damage (61) — directly reinforcing the earlier finding that delivery delay strongly impacts review scores, now confirmed independently through the review text itself.
+
+*Notebook: `notebooks/03_review_sentiment.ipynb`*
+
 ## Dashboard
 
 ![Dashboard Screenshot](images/dashboard_screenshot.png)
@@ -50,11 +60,12 @@ The dashboard includes:
 - Interactive state-level slicer
 
 ## Project Structure
+
 data/processed/ - Cleaned datasets and exports used for Power BI (raw data excluded due to size)
-notebooks/ - Python notebooks for data cleaning, merging, RFM segmentation, feature engineering, churn model
+notebooks/ - Python notebooks for data cleaning, merging, RFM segmentation, feature engineering, churn model, and review sentiment analysis
 sql/queries.sql - Documented SQL queries for all business questions
 dashboard/ - Power BI (.pbix) dashboard file
-images/ - Dashboard screenshot
+images/ - Dashboard screenshot and complaint themes chart
 
 ## Methodology
 
@@ -63,13 +74,14 @@ images/ - Dashboard screenshot
 3. **RFM Segmentation**: Scored all customers on Recency, Frequency, and Monetary value using quintile-based scoring, then classified them into six actionable segments (Champions, Loyal Customers, At Risk, Lost, New Customers, Needs Attention).
 4. **SQL Analysis**: Loaded the cleaned dataset into SQLite and wrote queries answering each business question independently of the Python analysis, to demonstrate both toolsets.
 5. **Churn Modeling**: Built a Random Forest classifier on top of RFM and delivery/review features, catching and correcting a data leakage issue before arriving at a realistic, defensible model.
-6. **Dashboard**: Built an interactive Power BI dashboard translating each finding into a visual, paired with a written business recommendation.
+6. **Review Sentiment Analysis**: Applied a pre-trained multilingual sentiment model and keyword-based theme tagging to unstructured review text, surfacing complaint themes invisible from star ratings alone.
+7. **Dashboard**: Built an interactive Power BI dashboard translating each finding into a visual, paired with a written business recommendation.
 
 ## How to Reproduce
 
 1. Download the raw dataset from [Kaggle - Olist Brazilian E-Commerce](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 2. Place the extracted CSVs into `data/raw/`
-3. Run the notebooks in `notebooks/` in order to clean, merge, export data, and train the churn model
+3. Run the notebooks in `notebooks/` in order to clean, merge, export data, train the churn model, and run sentiment analysis
 4. Open `dashboard/ecommerce_dashboard.pbix` in Power BI Desktop to view the interactive dashboard
 
 ## Author
